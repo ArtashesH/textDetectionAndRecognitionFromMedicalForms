@@ -41,7 +41,7 @@ def main():
             fileNamesList.write('\n')      
             #Read current image for processing
             img = cv2.imread(os.path.join(folder,filename))
-            scale_percent = 150 # percent of original size
+            scale_percent = 170 # percent of original size
             #Resizing image
             width = int(img.shape[1] * scale_percent / 100)
             height = int(img.shape[0] * scale_percent / 100)

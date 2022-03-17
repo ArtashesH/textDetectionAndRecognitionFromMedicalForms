@@ -12,6 +12,13 @@ def image_smoothening(img):
     img = cv2.GaussianBlur(img, (3, 3), 0)
     return img
 
+
+#Check intersection of rectangles
+
+def rectsAreintersecting(firstRect, secondRect):
+    rectInters =  (not (firstRect[0][0] < secondRect[2][0] or firstRect[2][0] > secondRect[0][0] or firstRect[0][1] or secondRect[2][1] or firstRect[2][1] > secondRect[0][1]))  or (firstRect[3][0] < secondRect[3][0] and  firstRect[3][1] < secondRect[3][1] and  firstRect[1][0] > secondRect[1][0] and  firstRect[1][1] > secondRect[1][1])
+    return rectInters
+
 #Find rectangle center point
 def findCenterOfTheRect(currentRect):
     centerPoint = []
@@ -24,30 +31,31 @@ def joinRects(firstRect, secondRect):
     finalRect = firstRect
     if firstRect[3][0] < secondRect[3][0]:
         finalRect[3][0] = firstRect[3][0]
-    if firstRect[3][0] > secondRect[3][0]:
+    if firstRect[3][0] >= secondRect[3][0]:
         finalRect[3][0] = secondRect[3][0]
 
     if firstRect[3][1] < secondRect[3][1]:
         finalRect[3][1] = firstRect[3][1]
-    if firstRect[3][1] > secondRect[3][1]:
+    if firstRect[3][1] >= secondRect[3][1]:
         finalRect[3][1] = secondRect[3][1]
 
 
     if firstRect[1][0] > secondRect[1][0]:
         finalRect[1][0] = firstRect[1][0]
-    if firstRect[1][0] < secondRect[1][0]:
+    if firstRect[1][0] <= secondRect[1][0]:
         finalRect[1][0] = secondRect[1][0]
 
     if firstRect[1][1] > secondRect[1][1]:
         finalRect[1][1] = firstRect[1][1]
-    if firstRect[1][1] < secondRect[1][1]:
+    if firstRect[1][1] <= secondRect[1][1]:
         finalRect[1][1] = secondRect[1][1]
 
+    
     finalRect[0][0] = finalRect[1][0]
     finalRect[0][1] = finalRect[3][1]
 
-    finalRect[2][0] = finalRect[1][0]
-    finalRect[2][1] = finalRect[3][1]
+    finalRect[2][0] = finalRect[3][0]
+    finalRect[2][1] = finalRect[1][1]
     return finalRect
 
 #Join rectangles on the same line, and get final rect gor given line
@@ -59,7 +67,7 @@ def filterAndJoinRects(inputRectsVec):
             for j in range(i+1, len(inputRectsVec)):
                 centerInputRect1 = findCenterOfTheRect(inputRectsVec[i])
                 centerInputRect2 = findCenterOfTheRect(inputRectsVec[j])
-                if abs(centerInputRect1[1] - centerInputRect2[1]) < 10:
+                if abs(centerInputRect1[1] - centerInputRect2[1]) < 20   or  rectsAreintersecting(inputRectsVec[i], inputRectsVec[j]):
                      joinRect = joinRects(inputRectsVec[i],inputRectsVec[j])
                      doProcessing = True
                      inputRectsVec.pop(j)
@@ -101,7 +109,7 @@ def findRectanglesBySize(inputRectsVec, imgWidth):
     filteredRectangles = []
     for i in range(len(inputRectsVec)):
        # centerPoint = findCenterOfTheRect(inputRectsVec[i])
-        if abs(inputRectsVec[i][0][0]  -  inputRectsVec[i][3][0])   > imgWidth * 2/3:
+        if abs(inputRectsVec[i][0][0]  -  inputRectsVec[i][3][0])   > imgWidth  /2:
             filteredRectangles.append(inputRectsVec[i])
     return filteredRectangles
 
@@ -147,7 +155,7 @@ def  main():
             print(inputImagePath)
             loaded_image = cv2.imread(inputImagePath)
             #Blur preprocessing
-            loaded_image = cv2.blur(loaded_image, (3,3))
+            loaded_image = cv2.medianBlur(loaded_image, 5)
             #Create output folder, if that does not exist
             isExist = os.path.exists(outputFolderPath)
             if not(isExist):
@@ -169,21 +177,61 @@ def  main():
             rectsForProcessing = []
             print("Rects size befire filter ")
             print(len(min_bboxes))
+            for i in range(len(min_bboxes)):
+                if min_bboxes[i][0][0] < 0:
+                    min_bboxes[i][0][0] = 0
+                if min_bboxes[i][0][1] < 0:
+                    min_bboxes[i][0][1] = 0
+
+                if min_bboxes[i][1][0] < 0:
+                    min_bboxes[i][1][0] = 0
+                if min_bboxes[i][1][1] < 0:
+                    min_bboxes[i][1][1] = 0
+
+                if min_bboxes[i][2][0] < 0:
+                    min_bboxes[i][2][0] = 0
+                if min_bboxes[i][2][1] < 0:
+                    min_bboxes[i][2][1] = 0
+
+                if min_bboxes[i][3][0] < 0:
+                    min_bboxes[i][3][0] = 0
+                if min_bboxes[i][3][1] < 0:
+                    min_bboxes[i][3][1] = 0
+
             rectsForProcessing = min_bboxes
             #Make filtering of found rectangles, join rectangles on the same line
             rectsForProcessing = filterAndJoinRects(rectsForProcessing)
+            print("Rects size after first filter ")         
+            print(len(rectsForProcessing))
             #Make filtering rects by size.
-            rectsFinal = findRectanglesBySize(rectsForProcessing, widthImg)
+           ############ rectsFinal = findRectanglesBySize(rectsForProcessing, widthImg)
+            min_bboxes = rectsForProcessing
             print("Rects size after filtering")
             print(len(min_bboxes))
             currentIndexForRes = 0
-            #Go over into all 
-            for i in range(len(min_bboxes)):
+            for i in range(len(min_bboxes)): 
+                print("Croped rect details")
+                print(str(min_bboxes[i]))
+            #Go over into all images                   
+            for i in range(len(min_bboxes)):               
                 #Get croped image by rectangle
-                cropImage = resImg[min_bboxes[i][3][1]:min_bboxes[i][1][1],  min_bboxes[i][3][0]-3:min_bboxes[i][1][0]+9]
+              
+
+                if min_bboxes[i][3][0] - 3 >= 0:
+                    min_bboxes[i][3][0] = min_bboxes[i][3][0] -3
+                else:
+                    min_bboxes[i][3][0] = 0
+
+
+                if min_bboxes[i][1][0] + 6 <= widthImg:
+                    min_bboxes[i][1][0] = min_bboxes[i][1][0] + 6 
+              
+
+
+                cropImage = resImg[min_bboxes[i][3][1]:min_bboxes[i][1][1],  min_bboxes[i][3][0]:min_bboxes[i][1][0]]              
                 scale_percent = 170 # percent of original size
                 width = int(cropImage.shape[1] * scale_percent / 100)
-                height = int(cropImage.shape[0] * scale_percent / 100)
+                height = int(cropImage.shape[0] * scale_percent / 100)               
                 if height == 0 or width == 0:
                     continue
                 dim = (width, height)  
