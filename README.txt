@@ -11,6 +11,14 @@ pip install swtloc==1.0.0.0
 
 pip install opencv-python
 
+pip install pdf2image
+
+pip install pypdf3
+
+pip install glob2
+
+pip install img2pdf
+
 fter packages are installed you can run programs.
 
 python textDetAndSeg.py inputFolderPath

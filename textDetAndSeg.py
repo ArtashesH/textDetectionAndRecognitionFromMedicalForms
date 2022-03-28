@@ -226,9 +226,7 @@ def  main():
                 if min_bboxes[i][1][0] + 6 <= widthImg:
                     min_bboxes[i][1][0] = min_bboxes[i][1][0] + 6 
               
-
-
-                cropImage = resImg[min_bboxes[i][3][1]:min_bboxes[i][1][1],  min_bboxes[i][3][0]:min_bboxes[i][1][0]]              
+                cropImage = resImg[min_bboxes[i][3][1]-3:min_bboxes[i][1][1]+6,  min_bboxes[i][3][0]-3:min_bboxes[i][1][0]+6]              
                 scale_percent = 170 # percent of original size
                 width = int(cropImage.shape[1] * scale_percent / 100)
                 height = int(cropImage.shape[0] * scale_percent / 100)               
