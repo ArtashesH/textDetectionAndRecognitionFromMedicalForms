@@ -40,3 +40,10 @@ This program is for text recognition from given images.
 
 input - inputFolderPath,  this is input folder path, where is located already cropped images, for recognition. The program will read and process all images, and recognition data for all images
 will be written in res.txt file, created in the same folder.
+
+python textHighlighting.py  inputPdfFilePath  textForHighLighting
+
+This program is for highlighting given text in pdf file with generating new pdf with highlighted texts
+
+input - input pdf file path , and text , which needs to be recognized and highlighted
+output- result pdf file, which will be generated in the same directory with input pdf, with highlighted texts
