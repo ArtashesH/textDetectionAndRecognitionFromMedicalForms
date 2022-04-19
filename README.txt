@@ -19,7 +19,11 @@ pip install glob2
 
 pip install img2pdf
 
-fter packages are installed you can run programs.
+pip install pdfrw  
+
+
+pip install PyMuPDF
+After packages are installed you can run programs.
 
 python textDetAndSeg.py inputFolderPath
 
